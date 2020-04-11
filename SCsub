@@ -1,0 +1,23 @@
+#!/usr/bin/env python
+
+import glob
+
+Import('env')
+
+sources = glob.glob("*.cpp")
+
+env_fastnoise = env.Clone()
+env_fastnoise.Append(CXXCFLAGS=["-O2", "-std=c++11", "-Werror", "-Wall"])
+
+if ARGUMENTS.get("fastnoise_shared", "no") == "yes":
+    env_fastnoise.Append(CXXFLAGS="-fPIC")
+
+    shared_lib = env_fastnoise.SharedLibrary(target="#bin/fastnoise", source=sources)
+
+
+    shared_lib_shim = shared_lib[0].name.rsplit(".", 1)[0]
+    env_fastnoise.Append(LIBS=[shared_lib_shim])
+    env_fastnoise.Append(LIBPATH="#bin")
+
+else:
+    env_fastnoise.add_source_files(env.modules_sources, sources)
